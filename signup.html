@@ -227,6 +227,15 @@
   
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Auto-redirect if already logged in
+      if (window.supabaseClient) {
+        window.supabaseClient.auth.getSession().then(({ data }) => {
+          if (data && data.session) {
+            window.location.href = 'student-dashboard.html';
+          }
+        });
+      }
+
       const form = document.getElementById('signupForm');
       const password = document.getElementById('password');
       const confirmPassword = document.getElementById('confirmPassword');

@@ -366,6 +366,40 @@
   <!-- Bootstrap 5 Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   
+  <!-- Supabase client for OAuth redirect parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/auth-config.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Detect if we landed here via OAuth redirect with hash parameters
+      if (window.location.hash && (window.location.hash.includes('access_token=') || window.location.hash.includes('id_token='))) {
+        console.log("OAuth redirect detected in hash. Redirecting to student-dashboard.html...");
+        setTimeout(() => {
+          window.location.href = 'student-dashboard.html';
+        }, 800);
+        return;
+      }
+
+      // 2. Check if user is already logged in, and update headers / CTAs
+      if (window.supabaseClient) {
+        const { data } = await window.supabaseClient.auth.getSession();
+        if (data && data.session) {
+          // Replace Login & Sign Up CTA buttons with Dashboard button
+          const loginBtn = document.querySelector('a[href="login.html"]');
+          const signupBtn = document.querySelector('a[href="signup.html"]');
+          if (loginBtn) {
+            loginBtn.href = 'student-dashboard.html';
+            loginBtn.textContent = 'Dashboard';
+          }
+          if (signupBtn) {
+            signupBtn.style.display = 'none'; // Hide the signup button if already logged in
+          }
+        }
+      }
+    });
+  </script>
+
   <!-- Custom JS -->
   <script src="js/script.js"></script>
 </body>
