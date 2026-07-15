@@ -13,7 +13,32 @@
       "PowerShell(cd c:\\\\Bhavana\\\\video\\\\backend; node -e \"require\\('dotenv'\\).config\\(\\); console.log\\('PORT=', process.env.PORT\\); console.log\\('SUPABASE_URL set:', !!process.env.SUPABASE_URL\\)\"; \"--- try starting server for 3s ---\"; $p = Start-Process node -ArgumentList \"server.js\" -PassThru -NoNewWindow -RedirectStandardOutput out.log -RedirectStandardError err.log; Start-Sleep -Seconds 3; if\\(!$p.HasExited\\){ \"SERVER STILL RUNNING \\(pid $\\($p.Id\\)\\)\"; Stop-Process -Id $p.Id -Force } else { \"SERVER EXITED with code $\\($p.ExitCode\\)\" }; \"--- STDOUT ---\"; Get-Content out.log -ErrorAction SilentlyContinue; \"--- STDERR ---\"; Get-Content err.log -ErrorAction SilentlyContinue)",
       "PowerShell(cd c:\\\\Bhavana\\\\video\\\\backend; $env:PORT=8000; Start-Process node -ArgumentList \"server.js\" -WindowStyle Hidden -RedirectStandardOutput srv-out.log -RedirectStandardError srv-err.log; Start-Sleep -Seconds 2; \"--- Is 8000 listening now? ---\"; Get-NetTCPConnection -State Listen -LocalPort 8000 -ErrorAction SilentlyContinue | Select LocalAddress,LocalPort,OwningProcess; \"--- GET /api/health ---\"; try { \\(Invoke-WebRequest http://localhost:8000/api/health -UseBasicParsing\\).Content } catch { \"ERR: $\\($_.Exception.Message\\)\" }; \"--- GET / \\(root\\) ---\"; try { $r=Invoke-WebRequest http://localhost:8000/ -UseBasicParsing; \"status $\\($r.StatusCode\\), len $\\($r.Content.Length\\)\" } catch { \"ERR: $\\($_.Exception.Message\\)\" })",
       "PowerShell(\"--- vercel.json exists? ---\"; Test-Path c:\\\\Bhavana\\\\video\\\\vercel.json; \"--- backend/routes ---\"; Get-ChildItem c:\\\\Bhavana\\\\video\\\\backend\\\\routes -ErrorAction SilentlyContinue | Select Name; \"--- notes.js size ---\"; \\(Get-Item c:\\\\Bhavana\\\\video\\\\backend\\\\routes\\\\notes.js\\).Length)",
-      "PowerShell(cd c:\\\\Bhavana\\\\video\\\\backend; Get-NetTCPConnection -State Listen -LocalPort 8000 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }; Start-Sleep 1; Start-Process node -ArgumentList \"server.js\" -WindowStyle Hidden -RedirectStandardOutput srv-out.log -RedirectStandardError srv-err.log; Start-Sleep 2; \"--- server stdout ---\"; Get-Content srv-out.log -ErrorAction SilentlyContinue; \"--- server stderr ---\"; Get-Content srv-err.log -ErrorAction SilentlyContinue; \"--- GET / ---\"; try { $r=Invoke-WebRequest http://localhost:8000/ -UseBasicParsing; \"200 len $\\($r.Content.Length\\)\" } catch { \"ERR: $\\($_.Exception.Message\\)\" }; \"--- GET /api/health ---\"; try { \\(Invoke-WebRequest http://localhost:8000/api/health -UseBasicParsing\\).Content } catch { \"ERR: $\\($_.Exception.Message\\)\" })"
+      "PowerShell(cd c:\\\\Bhavana\\\\video\\\\backend; Get-NetTCPConnection -State Listen -LocalPort 8000 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }; Start-Sleep 1; Start-Process node -ArgumentList \"server.js\" -WindowStyle Hidden -RedirectStandardOutput srv-out.log -RedirectStandardError srv-err.log; Start-Sleep 2; \"--- server stdout ---\"; Get-Content srv-out.log -ErrorAction SilentlyContinue; \"--- server stderr ---\"; Get-Content srv-err.log -ErrorAction SilentlyContinue; \"--- GET / ---\"; try { $r=Invoke-WebRequest http://localhost:8000/ -UseBasicParsing; \"200 len $\\($r.Content.Length\\)\" } catch { \"ERR: $\\($_.Exception.Message\\)\" }; \"--- GET /api/health ---\"; try { \\(Invoke-WebRequest http://localhost:8000/api/health -UseBasicParsing\\).Content } catch { \"ERR: $\\($_.Exception.Message\\)\" })",
+      "Bash(node \"C:/Users/ADMINI~1/AppData/Local/Temp/claude/c--Bhavana-video/3519c26e-2ae4-4a8a-9c19-d6a14f1c6c00/scratchpad/builder-test.js\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}, %{size_download} bytes\\\\n\" http://localhost:8000/student-dashboard.html)",
+      "Bash(node -e ' *)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:8000/student-dashboard.html)",
+      "PowerShell($c = Get-NetTCPConnection -State Listen -LocalPort 8000 -ErrorAction SilentlyContinue; if \\($c\\) { \"Server IS running on port 8000 \\(pid $\\($c.OwningProcess | Select-Object -First 1\\)\\)\"; try { \"health: \" + \\(Invoke-WebRequest http://localhost:8000/api/health -UseBasicParsing\\).Content } catch { \"health check failed\" } } else { \"Server is NOT running - you'll need to start it\" })",
+      "Bash(grep -n 'i + 1}\\\\. \\\\${s.title}' student-dashboard.html)",
+      "Bash(awk -F= '/^[A-Z]/{print $1\": \"\\(length\\($2\\)>0?\"SET\\(\"length\\($2\\)\" chars\\)\":\"EMPTY\"\\)}' backend/.env)",
+      "Bash(node -e \"require\\('./backend/routes/notes.js'\\); console.log\\('notes.js loads OK, no syntax errors'\\)\")",
+      "Bash(PORT=8123 node backend/server.js)",
+      "Bash(curl -s http://localhost:8123/api/health)",
+      "Bash(break)",
+      "Bash(curl -s -X POST http://localhost:8123/api/notes/generate -H 'Content-Type: application/json' -d '{\"videoUrl\":\"https://www.youtube.com/watch?v=aircAruvnKk\"}' -w '\\\\n---HTTP %{http_code}---\\\\n')",
+      "Read(//tmp/**)",
+      "Bash(pkill -f \"backend/server.js\")",
+      "Bash(netstat -ano)",
+      "Bash(curl -s -m 3 http://localhost:8000/api/health)",
+      "Bash(curl -s -m 3 http://localhost:9000/api/health)",
+      "Bash(taskkill //PID 12532 //F)",
+      "Bash(curl -s -m 3 http://localhost:8123/api/health)",
+      "Bash(xargs echo \"stale matches:\")",
+      "Bash(curl -s -m 5 http://localhost:8000/student-dashboard.html)",
+      "Bash(xargs echo \"min-width:0 occurrences served:\")",
+      "Bash(xargs echo \"toolbar-reflection present:\")",
+      "Bash(xargs echo \"analytics view \\(should be 0\\):\")",
+      "Bash(xargs echo \"taller panel served:\")"
     ]
   }
 }

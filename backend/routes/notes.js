@@ -28,6 +28,26 @@ async function fetchYoutubeTitle(videoId) {
   return null;
 }
 
+// Tolerant JSON parse: strips markdown code fences and any prose before/after
+// the JSON object, so a slightly-wrapped model response still parses cleanly.
+function parseModelJson(raw) {
+  if (raw == null) throw new Error('Empty model response');
+  let text = String(raw).trim();
+  // Remove ```json ... ``` (or plain ```) fences if present.
+  text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    // Fall back to the outermost { ... } span in case of leading/trailing prose.
+    const first = text.indexOf('{');
+    const last = text.lastIndexOf('}');
+    if (first !== -1 && last > first) {
+      return JSON.parse(text.slice(first, last + 1));
+    }
+    throw err;
+  }
+}
+
 // Fallback logic for AI generation
 async function generateWithFallback(prompt) {
   let lastError = null;
@@ -41,9 +61,9 @@ async function generateWithFallback(prompt) {
         messages: [{ role: 'user', content: prompt }],
         model: 'llama-3.1-8b-instant', // Updated from decommissioned llama3-8b-8192
         response_format: { type: 'json_object' },
-        max_tokens: 3000
+        max_tokens: 8000
       });
-      return JSON.parse(completion.choices[0].message.content);
+      return parseModelJson(completion.choices[0].message.content);
     } catch (err) {
       console.error('Groq generation failed:', err.message);
       lastError = err;
@@ -60,12 +80,12 @@ async function generateWithFallback(prompt) {
       });
       
       const completion = await openai.chat.completions.create({
-        model: 'openrouter/free', // Dynamically routes to an active free model
+        model: 'google/gemini-2.5-flash',
         messages: [{ role: 'user', content: prompt }],
         response_format: { type: 'json_object' },
-        max_tokens: 3000
+        max_tokens: 8000
       });
-      return JSON.parse(completion.choices[0].message.content);
+      return parseModelJson(completion.choices[0].message.content);
     } catch (err) {
       console.error('OpenRouter generation failed:', err.message);
       lastError = err;
@@ -84,7 +104,7 @@ async function generateWithFallback(prompt) {
           responseMimeType: 'application/json',
         }
       });
-      return JSON.parse(response.text);
+      return parseModelJson(response.text);
     } catch (err) {
       console.error('Gemini generation failed:', err.message);
       lastError = err;
@@ -137,7 +157,7 @@ router.post('/generate', async (req, res) => {
           }
         }
 
-        const maxChars = 3000;
+        const maxChars = 2600;
         let fullText = transcript.map(t => t.text).join(' ');
         
         if (fullText.length > maxChars) {
@@ -210,8 +230,10 @@ Return your response in JSON format. Do not include markdown code block formatti
 Important Instructions:
 1. Make sure all MCQs have exactly 4 choices in 'opts', and 'correct' is the index (0, 1, 2, or 3) of the correct answer.
 2. The quiz must contain exactly 10 MCQs, exactly 5 True/False (tf) questions, and exactly 5 Q&A (qa) questions.
-3. Provide at least 3 sections, 4 slides, and 4 timeline items.
-4. Make all the text rich, highly informative, and fully customized for: "${resolvedTitle}".`;
+3. The number of "sections" MUST scale with the length and depth of this video (about ${videoDurationStr} long). Do NOT use a fixed number — cover EVERY major topic in the content. Rough guide: a short video (~5 min) → 3-4 sections; medium (~15-20 min) → 6-8 sections; long (30+ min) → 10 or more sections. Each section needs a clear "heading", 3-6 detailed "points", and a concrete "example".
+4. Provide a "timeline" with one entry per major segment of the video (roughly one per section).
+5. The presentation is rebuilt on the client from "summary", "keyTakeaways", "sections", "timeline" and "conclusion", so make each of those fields complete and self-contained. To keep the response concise, put just ONE placeholder item in the "slides" array (a single intro slide); do NOT duplicate the section content into "slides". Spend that space on more detailed "sections" instead.
+6. Make all the text rich, highly informative, and fully customized for: "${resolvedTitle}".`;
 
     const generatedData = await generateWithFallback(prompt);
     
